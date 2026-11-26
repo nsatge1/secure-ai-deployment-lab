@@ -1,0 +1,43 @@
+# Secure AI Deployment Lab: service definitions.
+# Values come from .env (read automatically by Docker Compose, never committed).
+
+name: secure-ai-lab
+
+services:
+  db:
+    # VERIFY: tag on Docker Hub (pgvector/pgvector). Pinned by digest in step 8.
+    image: pgvector/pgvector:pg17
+    # Run as the image's unprivileged "postgres" user, never as root.
+    user: postgres
+    # Only the variables this container needs (least privilege): no env_file,
+    # so API_KEY and future secrets never reach the database container.
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is missing in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is missing in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is missing in .env}
+      DB_READER_PASSWORD: ${DB_READER_PASSWORD:?DB_READER_PASSWORD is missing in .env}
+      DB_INGEST_PASSWORD: ${DB_INGEST_PASSWORD:?DB_INGEST_PASSWORD is missing in .env}
+    volumes:
+      # Named volume: data survives `make down`, removed only by `make clean`.
+      - db-data:/var/lib/postgresql/data
+      # Init scripts, run once on an empty volume. Mounted read-only.
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    # No "ports:" section: the database is never reachable from the host.
+    networks:
+      - backend
+    healthcheck:
+      # $$ escapes $ for Compose, so the variable is expanded inside the container.
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  # Internal network: no route to the Internet. API, database and Ollama will share it.
+  backend:
+    internal: true
+
+volumes:
+  db-data:

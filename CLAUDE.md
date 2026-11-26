@@ -35,7 +35,7 @@ Phase 1 (local) is in progress. Later phases: an MCP agent, then an AWS version 
 
 ## Working rules
 
-1. **One step = one commit.** Stop after each step and wait for the owner's explicit approval before starting the next one. Never commit or push without being asked.
+1. **One step = one commit.** Stop after each step and wait for the owner's explicit approval before starting the next one. **The owner runs every `git add`, `git commit` and `git push` themselves**: never run them, even when the owner says a step is ready. At most, list the files to stage and suggest a commit message.
 2. **Explain every file, part by part**, before or alongside writing it. The owner validates each line; keep files small enough to be explained.
 3. **Flag uncertainty explicitly**: any command, flag, image tag, version, or OWASP/ANSSI reference you are not sure of gets marked so the owner checks the official documentation before running it. Never cite ANSSI recommendation numbers or OWASP IDs from memory as fact.
 4. **No secrets anywhere** in code, examples, docs or commit messages. Do not try to read `.env` (access is deliberately denied).
