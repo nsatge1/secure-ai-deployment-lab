@@ -221,3 +221,18 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------
+# Secure AI Deployment Lab: project-specific rules
+# ---------------------------------------------------------------
+# Any env file holds real secrets, except the documented template.
+.env.*
+!.env.example
+
+# TLS material generated locally (step 7). Never committed.
+nginx/certs/
+*.pem
+*.key
+
+# Claude Code: personal local settings stay on this machine.
+.claude/settings.local.json

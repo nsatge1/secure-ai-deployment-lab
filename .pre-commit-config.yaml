@@ -1,0 +1,9 @@
+# Hooks run automatically by `git commit` once installed with `make hooks`.
+# A hook that fails blocks the commit.
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    # VERIFY: pin to the latest release tag (https://github.com/gitleaks/gitleaks/releases),
+    # or run `pre-commit autoupdate` to set it automatically.
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
