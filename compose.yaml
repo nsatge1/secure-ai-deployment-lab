@@ -34,10 +34,49 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+  ollama:
+    build: ./ollama
+    image: secure-ai-lab/ollama:local
+    volumes:
+      # Read-only: the running model server cannot alter or replace the models.
+      - ollama-models:/models:ro
+    # No "ports:" section, and only the internal network: no Internet, no host access.
+    networks:
+      - backend
+    healthcheck:
+      # "ollama list" succeeds only if the server answers.
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  models-pull:
+    build: ./ollama
+    image: secure-ai-lab/ollama:local
+    # Not started by "make up": only by "make models".
+    profiles: ["tools"]
+    entrypoint: ["/usr/local/bin/pull-models.sh"]
+    environment:
+      # VERIFY: model names on https://ollama.com/library. Override them in .env if needed.
+      CHAT_MODEL: ${CHAT_MODEL:-llama3.2:3b}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
+    volumes:
+      # Read-write: this is the only container allowed to write models.
+      - ollama-models:/models
+      - ./ollama/pull-models.sh:/usr/local/bin/pull-models.sh:ro
+    # Only this network has Internet access; it is NOT connected to "backend".
+    networks:
+      - models-pull
+
 networks:
-  # Internal network: no route to the Internet. API, database and Ollama will share it.
+  # Internal network: no route to the Internet. API, database and Ollama share it.
   backend:
     internal: true
+  # Regular network with Internet access, used only while downloading models.
+  models-pull: {}
 
 volumes:
   db-data:
+  ollama-models:

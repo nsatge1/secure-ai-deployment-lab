@@ -1,7 +1,7 @@
 # Entry point for every task in the lab. Run `make` or `make help` to list targets.
 
 .DEFAULT_GOAL := help
-.PHONY: help env hooks scan-secrets check-env up down ps logs db-shell clean
+.PHONY: help env hooks scan-secrets check-env models up down ps logs db-shell clean
 
 help: ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -27,8 +27,11 @@ check-env: ## Refuse to start if .env is missing or still has placeholders
 		echo "Replace every CHANGE_ME value in .env before starting"; exit 1; \
 	fi
 
-up: check-env ## Start the stack and wait until services are healthy
-	docker compose up -d --wait
+models: check-env ## Download the models (the only step with Internet access)
+	docker compose --profile tools run --rm --build models-pull
+
+up: check-env ## Build if needed, start the stack and wait until services are healthy
+	docker compose up -d --build --wait
 
 down: ## Stop the stack (data volumes are kept)
 	docker compose down
