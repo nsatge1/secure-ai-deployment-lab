@@ -1,0 +1,6 @@
+# Only what the image needs is sent to the Docker build.
+**/__pycache__
+**/*.pyc
+.venv/
+tests/
+requirements.in

@@ -1,0 +1,5 @@
+# Direct dependencies only, without versions.
+# `make lock` resolves them into requirements.txt with exact versions and hashes.
+fastapi
+uvicorn
+pydantic-settings

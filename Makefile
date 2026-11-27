@@ -1,7 +1,7 @@
 # Entry point for every task in the lab. Run `make` or `make help` to list targets.
 
 .DEFAULT_GOAL := help
-.PHONY: help env hooks scan-secrets check-env models up down ps logs db-shell clean
+.PHONY: help env hooks scan-secrets check-env lock models up down ps logs db-shell clean
 
 help: ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -26,6 +26,10 @@ check-env: ## Refuse to start if .env is missing or still has placeholders
 	@if grep -q CHANGE_ME .env; then \
 		echo "Replace every CHANGE_ME value in .env before starting"; exit 1; \
 	fi
+
+lock: ## Pin API dependencies with exact versions and hashes (requires uv)
+	cd api && uv pip compile requirements.in --universal --python-version 3.13 \
+		--generate-hashes --output-file requirements.txt
 
 models: check-env ## Download the models (the only step with Internet access)
 	docker compose --profile tools run --rm --build models-pull

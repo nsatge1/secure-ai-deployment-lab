@@ -28,7 +28,7 @@ Phase 1 (local) is in progress. Later phases: an MCP agent, then an AWS version 
 5. RAG ingestion (explain RAG concepts before writing code)
 6. `/ask` endpoint (retrieval, delimited context, input limits, cited sources)
 7. Nginx (TLS, API key, rate limit, body size)
-8. Container hardening
+8. Container hardening (includes: remove pip from the final API image; move DB passwords from `environment:` to Compose secrets)
 9. `make verify` security tests
 10. CI (ruff, bandit, pip-audit, hadolint, trivy, gitleaks)
 11. README (problem, Mermaid diagram, risk → control → verification table, quickstart, done/todo)

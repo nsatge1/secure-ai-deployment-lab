@@ -52,6 +52,25 @@ services:
       start_period: 20s
     restart: unless-stopped
 
+  api:
+    build: ./api
+    image: secure-ai-lab/api:local
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    # "app": reached by Nginx (step 7). "backend": reaches the database and Ollama.
+    # No "ports:" section: the API is never exposed directly.
+    networks:
+      - app
+      - backend
+    healthcheck:
+      # The slim image has no curl: Python's standard library does the check.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
   models-pull:
     build: ./ollama
     image: secure-ai-lab/ollama:local
@@ -71,6 +90,9 @@ services:
       - models-pull
 
 networks:
+  # Internal network between Nginx (step 7) and the API. No route to the Internet.
+  app:
+    internal: true
   # Internal network: no route to the Internet. API, database and Ollama share it.
   backend:
     internal: true
